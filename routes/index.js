@@ -91,5 +91,19 @@ module.exports = function(){
 		}); 
 	});
 	
+	
+	var transfermarktparser = converter.createParser(['#contentfullsizeib div[style="overflow-x:auto;"] .tablecontent03 td:first-child', 
+	    function ($a) {
+			return unorm.nfkd($a.text()).replace(combining, '') ;
+		}
+	]);
+	
+	router.get('/api/transfer/:id', function(req, res) {
+		var id = req.params.id;
+		transfermarktparser.request('http://classic.comunio.de/teamInfo.phtml?tid='+id).done(function (transfers) {		
+			res.send(transfers);
+		}); 
+	});
+	
 	return router;
 }
