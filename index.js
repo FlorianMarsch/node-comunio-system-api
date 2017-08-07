@@ -1,11 +1,32 @@
+var express = require('express');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
 
-var app = require('./app')();
+var app = express();
+
+	
+app.set('secretKey', (process.env.SECRET_KEY || 'mySecretKey'));
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded());
+app.use(cookieParser());
 
 
-app.get('/', 'pages/index');
+    
 
-app.mock('/api/news', 'news');
-app.protect('/api/league', 'league');
+
+app.set('port', (process.env.PORT || 5000));
+
+var routes = require('./routes/index')();
+app.use('/', routes);
+
+
+
+app.listen(app.get('port'), function() {
+  console.log('Node app is running on port', app.get('port'));
+});
+
+
 
 
 

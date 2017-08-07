@@ -1,46 +1,94 @@
 var express = require('express');
 var router = express.Router();
+var converter = require('html-to-json');
+var unorm = require('unorm');
+var Series = require('./async');
+var request = require('request');
 
-var isAuthenticated = function (req, res, next) {
-	// if user is authenticated in the session, call the next() to call the next request handler 
-	// Passport adds this method to request object. A middleware is allowed to add properties to
-	// request and response objects
-	if (req.isAuthenticated())
-		return next();
-	// if the user is not authenticated then redirect him to the login page
-	res.redirect('/');
-}
-
-module.exports = function(passport){
-
-	/* Handle Login POST */
-	router.post('/login', passport.authenticate('login', {
-		successRedirect: '/',
-		failureRedirect: '/failure',
-		failureFlash : true  
-	}));
-
-	/* Handle Registration POST */
-	router.post('/signup', passport.authenticate('signup', {
-		successRedirect: '/user',
-		failureRedirect: '/signup',
-		failureFlash : true  
-	}));
-
-	/* Handle Logout */
-	router.get('/signout', function(req, res) {
-		req.logout();
-		res.redirect('/');
+module.exports = function(){
+	
+	var gamedayparser = converter.createParser(['#inhalt h3', {
+		  gameday: function ($a) {
+		    return  parseInt($a.text().split(". Spieltag ")[0]);
+		  },
+		  season: function ($a) {
+		    return $a.text().split(". Spieltag ")[1].replace("/", "-");
+		  }
+		}]);
+	
+	router.get('/api/currentGameday', function(req, res) {
+		gamedayparser.request('http://stats.comunio.de/matchday').done(function (days) {		
+			res.send(days[0]);
+		}); 
 	});
 	
-	router.get('/user', function(req, res) {
-		
-		if (req.isAuthenticated()){
-			res.send({'id':req.user._id, 'auth':true});
-		}else{
-			res.send({'id':undefined, 'auth':false});
+	var combining = /[\u0300-\u036F]/g; // Use XRegExp('\\p{M}', 'g'); see example.js. 
+	
+	
+	var lineupparser = converter.createParser(['.name_cont', 
+	    function ($a) {
+			return unorm.nfkd($a.text()).replace(combining, '') ;
 		}
-		   
+	]);
+	
+	router.get('/api/lineup/:id', function(req, res) {
+		var id = req.params.id;
+		lineupparser.request('http://classic.comunio.de/playerInfo.phtml?pid='+id).done(function (player) {		
+			res.send(player);
+		}); 
+	});
+	
+	var gameparser = converter.createParser([' .zoomable a', 
+   	    function ($a) {
+   			return $a.attr("id").replace("_lnk", "").replace("m", "");
+   		}
+   	]);
+	
+	
+	router.get('/api/result/:season/:number', function(req, res) {
+		var season = req.params.season;
+		var number = req.params.number;
+		gameparser.request("http://stats.comunio.de/matchday/" + season + "/" + number).done(function (games) {		
+			var series = new Series();
+			games.forEach(function(game) {
+				series.then(function (done) {
+					request("http://stats.comunio.de/matchdetails.php?mid="+game ,function (error, response, body) {
+						
+						var response = JSON.parse(unorm.nfkd(body).replace(combining, ''));
+						var goals = response.g;
+						var partie = response.p;
+						var scores = [];
+						
+						goals.forEach(function(goal, index){
+							var score = {};
+							score.id=partie + "-" + index+"-"+goal.n;
+							score.id=score.id.replace(" ", "").replace(".", "").toUpperCase();
+							score.name=goal.n;
+							score.event="Goal";
+							if (goal.p > 0) {
+								score.event="Penalty";
+							}
+							if (goal.o > 0) {
+								score.event="Own";
+							}
+							scores.push(score);
+						});
+						
+						done(scores);
+					}).on('error', function(){
+						done([]);
+					});
+					
+				});
+			});
+			series.async(function(results){
+				var all = [];
+				results.forEach(function(result){
+					all = all.concat(result);
+				});
+				res.send(all);
+			});
+		}); 
 	});
 	
 	return router;
