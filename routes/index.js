@@ -98,7 +98,7 @@ module.exports = function(){
 		}
 	]);
 	
-	router.get('/api/transfer/:id', function(req, res) {
+	router.get('/api/transfers/:id', function(req, res) {
 		var id = req.params.id;
 		transfermarktparser.request('http://classic.comunio.de/teamInfo.phtml?tid='+id).done(function (transfers) {		
 			res.send(transfers);
