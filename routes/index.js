@@ -48,7 +48,11 @@ module.exports = function(){
 	router.get('/api/result/:season/:number', function(req, res) {
 		var season = req.params.season;
 		var number = req.params.number;
-		gameparser.request("http://stats.comunio.de/matchday/" + season + "/" + number).done(function (games) {		
+		gameparser.request("http://stats.comunio.de/matchday/" + season + "/" + number).done(function (games) {	
+			if(games.length === 0){
+				res.send([]);
+				return;
+			}
 			var series = new Series();
 			games.forEach(function(game) {
 				series.then(function (done) {
