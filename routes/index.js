@@ -109,5 +109,64 @@ module.exports = function(){
 		}); 
 	});
 	
+	var possibleplayerparser = converter.createParser(['.clubPic a', 
+  	    function ($a) {
+			return 'http://stats.comunio.de'+$a.attr("href");
+  		}
+  	]);
+	
+	var playerparser = converter.createParser(['.rangliste tbody tr', {
+ 	    id : function ($a) {
+			return $a.find(' .playerCompare div div').attr('data-basepid');
+ 		},
+ 		name : function ($a) {
+			var name= $a.find(' .playerCompare div a').text();
+			return unorm.nfkd(name).replace(combining, '') ;
+ 		},
+ 		url : function ($a) {
+			return 'http://stats.comunio.de'+$a.find(' .playerCompare div a').attr('href');
+ 		},
+ 		position : function ($a) {
+			return $a.find('td:nth-child(3)').text();
+ 		},
+ 		points : function ($a) {
+			return parseInt($a.find('td:nth-child(4)').text());
+ 		},
+ 		price : function ($a) {
+			return parseInt($a.find('td:nth-child(5)').text().replace(".","").replace(".",""));
+ 		},
+ 		picture : function($a){
+ 			var id = $a.find(' .playerCompare div div').attr('data-basepid');
+ 			return 'http://classic.comunio.de/tradablePhoto.phtml/l/'+id+'.gif';
+ 		}
+	}]);
+	router.get('/api/player/', function(req, res) {
+		
+		possibleplayerparser.request('http://stats.comunio.de/league_standings').done(function (teams) {		
+			if(teams.length === 0){
+				res.send([]);
+				return;
+			}
+			var series = new Series();
+			teams.forEach(function(team) {
+				series.then(function (done) {
+					playerparser.request(team).done(function (players) {		
+						done(players);
+					});
+				});
+			});
+			series.async(function(results){
+				var all = [];
+				results.forEach(function(result){
+					all = all.concat(result);
+				});
+				res.send(all.filter(function(element){
+					return element.id;
+				}));
+			});
+		}); 
+	});
+	
+	
 	return router;
 }
