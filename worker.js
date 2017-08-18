@@ -26,8 +26,11 @@ var localhost = (process.env.HOST || "localhost")+":"+(process.env.PORT || 5000)
 		  if(channel==="gameday"){
 			  request("http://"+localhost+"/api/result/"+payload.season+"/"+payload.gameday,function (error, response, body) {
 					payload.results = JSON.parse(body);
+					console.log(JSON.stringify(payload));
 					publisher.publish("results", JSON.stringify(payload));
 				}).on('error', function(error){
+
+					console.log(publisher.publish);
 					console.log(error);
 				});
 		  };
