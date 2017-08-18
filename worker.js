@@ -5,7 +5,7 @@ var subscriber  = redis.createClient(process.env.REDIS_URL);
 
 var  minutely = 60*1*1000;
 var hourly = minutely*60;
-var localhost = "localhost:"+(process.env.PORT || 5000);
+var localhost = (process.env.HOST || "localhost")+":"+(process.env.PORT || 5000);
 
 	var pollGameday = function() {
 		request("http://"+localhost+"/api/currentGameday",function (error, response, body) {
