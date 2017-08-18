@@ -10,7 +10,7 @@ var localhost = "localhost:"+(process.env.PORT || 5000);
 	var pollGameday = function() {
 		request("http://"+localhost+"/api/currentGameday",function (error, response, body) {
 			publisher.publish("gameday", body);
-		}).on('error', function(){
+		}).on('error', function(error){
 			console.log(error);
 		});
 	};
@@ -27,7 +27,7 @@ var localhost = "localhost:"+(process.env.PORT || 5000);
 			  request("http://"+localhost+"/api/result/"+payload.season+"/"+payload.gameday,function (error, response, body) {
 					payload.results = JSON.parse(body);
 					publisher.publish("results", JSON.stringify(payload));
-				}).on('error', function(){
+				}).on('error', function(error){
 					console.log(error);
 				});
 		  };
