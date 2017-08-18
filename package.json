@@ -7,14 +7,15 @@
   },
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js && node worker.js"
   },
   "dependencies": {
     "express": "4.15.2",
-	"body-parser":"1.17.2",
-	"cookie-parser":"1.4.3",
-	"html-to-json":"0.6.0",
-	"unorm":"1.4.1"
+    "body-parser": "1.17.2",
+    "cookie-parser": "1.4.3",
+    "html-to-json": "0.6.0",
+    "unorm": "1.4.1",
+    "redis": "2.8.0"
   },
   "repository": {
     "type": "git",
