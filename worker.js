@@ -30,9 +30,12 @@ var localhost = (process.env.POLL_HOST || "localhost")+":"+(process.env.POLL_POR
 
 	
 	subscriber.on("message", function(channel, message) {
-		if(!message){
+
+		console.log("debug log  "+channel+" : " + message);
+		if(!message || channel === "debug"){
 			return;
 		}
+		
 		var payload = JSON.parse(message);
 		  if(channel==="gameday"){
 			  request("http://"+localhost+"/api/result/"+payload.season+"/"+payload.gameday,function (error, response, body) {
@@ -58,13 +61,12 @@ var localhost = (process.env.POLL_HOST || "localhost")+":"+(process.env.POLL_POR
 		  if(channel==="results"){
 			  	console.log(payload);
 		  };
-		  if(channel==="debug"){
-			  	console.log("debug log : " + payload);
-		  };
+		  
+		  
 	});
 
 	subscriber.subscribe("gameday");
-	subscriber.subscribe("results");
+	subscriber.subscribe("resultsChanged");
 	subscriber.subscribe("debug");
 	
 	
