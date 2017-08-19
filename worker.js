@@ -37,8 +37,20 @@ var localhost = (process.env.POLL_HOST || "localhost")+":"+(process.env.POLL_POR
 		  if(channel==="gameday"){
 			  request("http://"+localhost+"/api/result/"+payload.season+"/"+payload.gameday,function (error, response, body) {
 					payload.results = JSON.parse(body);
-					console.log(JSON.stringify(payload));
 					publisher.publish("results", JSON.stringify(payload));
+					
+					
+					var last = client.get("currentResults");
+					client.set("currentResults", JSON.stringify(payload));
+					
+					if(last && last !== JSON.stringify(payload)){
+						var event ={};
+						event.last = JSON.parse(last);
+						event.current = payload;
+						publisher.publish("resultChanged", JSON.stringify(event) );
+					}
+					
+					
 				}).on('error', function(error){
 					console.log(error);
 				});
