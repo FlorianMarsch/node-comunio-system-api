@@ -42,6 +42,7 @@ var localhost = (process.env.POLL_HOST || "localhost")+":"+(process.env.POLL_POR
 
 	subscriber.subscribe("gameday");
 	subscriber.subscribe("results");
+	subscriber.subscribe("debug");
 	
 	
 	console.log('Node worker is running, polling to '+localhost);
