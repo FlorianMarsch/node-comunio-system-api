@@ -35,6 +35,9 @@ var localhost = (process.env.HOST || "localhost")+":"+(process.env.PORT || 5000)
 		  if(channel==="results"){
 			  	console.log(payload);
 		  };
+		  if(channel==="debug"){
+			  	console.log("debug log : " + payload);
+		  };
 	});
 
 	subscriber.subscribe("gameday");
