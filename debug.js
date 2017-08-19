@@ -1,6 +1,5 @@
 var redis = require("redis");
 var request = require('request');
-var publisher  = redis.createClient(process.env.REDIS_URL);
 var subscriber  = redis.createClient(process.env.REDIS_URL);
 
 
