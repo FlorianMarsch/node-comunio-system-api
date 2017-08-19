@@ -3,7 +3,7 @@ var request = require('request');
 var publisher  = redis.createClient(process.env.REDIS_URL);
 var subscriber  = redis.createClient(process.env.REDIS_URL);
 
-var  minutely = 60*1*1000;
+var  minutely =  parseInt((process.env.POLL_TIME || 60*1*1000));
 var hourly = minutely*60;
 var localhost = (process.env.POLL_HOST || "localhost")+":"+(process.env.POLL_PORT || 5000);
 
@@ -11,8 +11,8 @@ var localhost = (process.env.POLL_HOST || "localhost")+":"+(process.env.POLL_POR
 		request("http://"+localhost+"/api/currentGameday",function (error, response, body) {
 			publisher.publish("gameday", body );
 			
-			var last = client.get("currentGameday");
-			client.set("currentGameday", body);
+			var last = publisher.get("currentGameday");
+			publisher.set("currentGameday", body);
 			
 			if(last && last !== body){
 				var event ={};
@@ -40,8 +40,8 @@ var localhost = (process.env.POLL_HOST || "localhost")+":"+(process.env.POLL_POR
 					publisher.publish("results", JSON.stringify(payload));
 					
 					
-					var last = client.get("currentResults");
-					client.set("currentResults", JSON.stringify(payload));
+					var last = publisher.get("currentResults");
+					publisher.set("currentResults", JSON.stringify(payload));
 					
 					if(last && last !== JSON.stringify(payload)){
 						var event ={};
