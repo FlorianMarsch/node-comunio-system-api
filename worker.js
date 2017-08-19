@@ -11,6 +11,7 @@ var localhost = (process.env.HOST || "localhost")+":"+(process.env.PORT || 5000)
 		request("http://"+localhost+"/api/currentGameday",function (error, response, body) {
 			publisher.publish("gameday", body);
 		}).on('error', function(error){
+			console.log(publisher.publish);
 			console.log(error);
 		});
 	};
