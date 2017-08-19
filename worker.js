@@ -41,5 +41,5 @@ var localhost = (process.env.HOST || "localhost")+":"+(process.env.PORT || 5000)
 	subscriber.subscribe("results");
 	
 	
-	console.log('Node worker is runnin use '+publisher.publish);
+	console.log('Node worker is running');
 
