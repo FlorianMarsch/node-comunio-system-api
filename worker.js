@@ -11,16 +11,16 @@ var localhost = (process.env.POLL_HOST || "localhost")+":"+(process.env.POLL_POR
 		request("http://"+localhost+"/api/currentGameday",function (error, response, body) {
 			publisher.publish("gameday", body );
 			
-			var last = publisher.get("currentGameday");
-			publisher.set("currentGameday", body);
-			
-			if(last && last !== body){
-				var event ={};
-				event.last = JSON.parse(last);
-				event.current = JSON.parse(body);
-				publisher.publish("gamedayChanged", JSON.stringify(event) );
-			}
-			
+			var last = publisher.get("currentGameday",function(err, data){
+				publisher.set("currentGameday", body);
+				
+				if(data && data !== body){
+					var event ={};
+					event.last = JSON.parse(data);
+					event.current = JSON.parse(body);
+					publisher.publish("gamedayChanged", JSON.stringify(event) );
+				};
+			});
 		}).on('error', function(error){
 			console.log(error);
 		});
@@ -43,15 +43,16 @@ var localhost = (process.env.POLL_HOST || "localhost")+":"+(process.env.POLL_POR
 					publisher.publish("results", JSON.stringify(payload));
 					
 					
-					var last = publisher.get("currentResults");
-					publisher.set("currentResults", JSON.stringify(payload));
-					
-					if(last && last !== JSON.stringify(payload)){
-						var event ={};
-						event.last = JSON.parse(last);
-						event.current = payload;
-						publisher.publish("resultsChanged", JSON.stringify(event) );
-					}
+					var last = publisher.get("currentResults",function(err, data){
+						publisher.set("currentResults", JSON.stringify(payload));
+						
+						if(data && data !== JSON.stringify(payload)){
+							var event ={};
+							event.last = JSON.parse(data);
+							event.current = payload;
+							publisher.publish("resultsChanged", JSON.stringify(event) );
+						};
+					});
 					
 					
 				}).on('error', function(error){
