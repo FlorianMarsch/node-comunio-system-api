@@ -9,7 +9,7 @@ var localhost = (process.env.HOST || "localhost")+":"+(process.env.PORT || 5000)
 
 	var pollGameday = function() {
 		request("http://"+localhost+"/api/currentGameday",function (error, response, body) {
-			publisher.publish("gameday", body);
+			publisher.publish("gameday", body , function(){});
 		}).on('error', function(error){
 			console.log(error);
 		});
@@ -27,7 +27,7 @@ var localhost = (process.env.HOST || "localhost")+":"+(process.env.PORT || 5000)
 			  request("http://"+localhost+"/api/result/"+payload.season+"/"+payload.gameday,function (error, response, body) {
 					payload.results = JSON.parse(body);
 					console.log(JSON.stringify(payload));
-					publisher.publish("results", JSON.stringify(payload));
+					publisher.publish("results", JSON.stringify(payload) , function(){});
 				}).on('error', function(error){
 					console.log(error);
 				});
