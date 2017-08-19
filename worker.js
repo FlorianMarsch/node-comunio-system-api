@@ -50,7 +50,7 @@ var localhost = (process.env.POLL_HOST || "localhost")+":"+(process.env.POLL_POR
 						var event ={};
 						event.last = JSON.parse(last);
 						event.current = payload;
-						publisher.publish("resultChanged", JSON.stringify(event) );
+						publisher.publish("resultsChanged", JSON.stringify(event) );
 					}
 					
 					
@@ -66,7 +66,11 @@ var localhost = (process.env.POLL_HOST || "localhost")+":"+(process.env.POLL_POR
 	});
 
 	subscriber.subscribe("gameday");
+	subscriber.subscribe("gamedayChanged");
+
+	subscriber.subscribe("results");
 	subscriber.subscribe("resultsChanged");
+	
 	subscriber.subscribe("debug");
 	
 	
