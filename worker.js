@@ -10,6 +10,17 @@ var localhost = (process.env.POLL_HOST || "localhost")+":"+(process.env.POLL_POR
 	var pollGameday = function() {
 		request("http://"+localhost+"/api/currentGameday",function (error, response, body) {
 			publisher.publish("gameday", body );
+			
+			var last = client.get("currentGameday");
+			client.set("currentGameday", body);
+			
+			if(last && last !== body){
+				var event ={};
+				event.last = JSON.parse(last);
+				event.current = JSON.parse(body);
+				publisher.publish("gamedayChanged", JSON.stringify(event) );
+			}
+			
 		}).on('error', function(error){
 			console.log(error);
 		});
