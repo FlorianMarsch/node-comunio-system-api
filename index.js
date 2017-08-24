@@ -27,7 +27,9 @@ app.listen(app.get('port'), function() {
 });
 
 
-
+process.on('uncaughtException', function (err) {
+	  console.error(err.stack);
+	});
 
 
 
