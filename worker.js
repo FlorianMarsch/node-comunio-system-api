@@ -36,8 +36,9 @@ var localhost = (process.env.POLL_HOST || "localhost")+":"+(process.env.POLL_POR
 			return;
 		}
 		
-		var payload = JSON.parse(message);
+		
 		  if(channel==="gameday"){
+			  var payload = JSON.parse(message);
 			  request("http://"+localhost+"/api/result/"+payload.season+"/"+payload.gameday,function (error, response, body) {
 					payload.results = JSON.parse(body);
 					publisher.publish("results", JSON.stringify(payload));
@@ -59,8 +60,18 @@ var localhost = (process.env.POLL_HOST || "localhost")+":"+(process.env.POLL_POR
 					console.log(error);
 				});
 		  };
-		  if(channel==="results"){
-			  	console.log(payload);
+		  if(channel==="hourly"){
+			  request("http://"+localhost+"/api/player/",function (error, response, body) {
+				 
+					publisher.publish("player", body);
+					var last = publisher.get("currentPlayers",function(err, data){
+						publisher.set("currentPlayers", body);
+							
+						if(data && data !== body){
+							publisher.publish("playersChanged", body);
+						};
+					});
+			  });
 		  };
 		  
 		  
@@ -72,7 +83,7 @@ var localhost = (process.env.POLL_HOST || "localhost")+":"+(process.env.POLL_POR
 	subscriber.subscribe("results");
 	subscriber.subscribe("resultsChanged");
 	
-	subscriber.subscribe("debug");
+	subscriber.subscribe("hourly");
 	
 	
 	console.log('Node worker is running, polling to '+localhost);
