@@ -62,33 +62,36 @@ module.exports = function(){
 						var goals = response.g;
 						var partie = response.p;
 						var scores = [];
-						if(goals.length === 0){
-							var players = response.h.concat(response.g);
-							var goalplayers =players.filter(function(player){
-								return player.t > 0 || player.e > 0;
-							});
-							
-							goalplayers.forEach(function(player,index){
-								var goalcount = player.t+player.e;
-								for (i = 0; i < goalcount; i++) {
-								    goals.push(player);
-								}
-							});
-							
-							
-							
-						}
+						var events = goals.filter(function(goal){
+							return goal.o > 0; // start with own goals initialized
+						});
+
+						var players = response.h.concat(response.a);
+						var goalplayers =players.filter(function(player){
+							return player.t > 0 || player.e > 0;
+						});
 						
-						goals.forEach(function(goal, index){
+						goalplayers.forEach(function(player,index){
+							var goalcount = player.t+player.e;
+							for (i = 0; i < goalcount; i++) {
+								events.push(player);
+							}
+						});
+						
+						
+							
+							
+							
+						
+						
+						events.forEach(function(goal, index){
 							var score = {};
 							score.id=partie + "-" + index+"-"+goal.n;
 							score.id=score.id.replace(" ", "").replace(".", "").toUpperCase();
 							score.name=goal.n;
 							score.event="Goal";
-							if (goal.p > 0) {
-								score.event="Penalty";
-							}
-							if (goal.o > 0) {
+							
+							if (goal.o) {
 								score.event="Own";
 							}
 							scores.push(score);
