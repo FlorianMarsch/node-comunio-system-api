@@ -29,6 +29,22 @@ var localhost = (process.env.POLL_HOST || "localhost")+":"+(process.env.POLL_POR
 	setInterval(pollGameday, minutely);
 
 	
+	var pollPlayers = function(){
+		request("http://"+localhost+"/api/player/",function (error, response, body) {
+			 
+			publisher.publish("player", body);
+			var last = publisher.get("currentPlayers",function(err, data){
+				publisher.set("currentPlayers", body);
+					
+				if(data && data !== body){
+					publisher.publish("playersChanged", body);
+				};
+			});
+	  });
+	};
+	
+	setInterval(pollGameday, hourly);
+	
 	subscriber.on("message", function(channel, message) {
 
 		console.log("debug log  "+channel+" : " + message);
@@ -60,19 +76,7 @@ var localhost = (process.env.POLL_HOST || "localhost")+":"+(process.env.POLL_POR
 					console.log(error);
 				});
 		  };
-		  if(channel==="hourly"){
-			  request("http://"+localhost+"/api/player/",function (error, response, body) {
-				 
-					publisher.publish("player", body);
-					var last = publisher.get("currentPlayers",function(err, data){
-						publisher.set("currentPlayers", body);
-							
-						if(data && data !== body){
-							publisher.publish("playersChanged", body);
-						};
-					});
-			  });
-		  };
+		  
 		  
 		  
 	});
@@ -82,8 +86,7 @@ var localhost = (process.env.POLL_HOST || "localhost")+":"+(process.env.POLL_POR
 
 	subscriber.subscribe("results");
 	subscriber.subscribe("resultsChanged");
-	
-	subscriber.subscribe("hourly");
+
 	
 	
 	console.log('Node worker is running, polling to '+localhost);
