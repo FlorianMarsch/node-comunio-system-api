@@ -43,7 +43,7 @@ var localhost = (process.env.POLL_HOST || "localhost")+":"+(process.env.POLL_POR
 	  });
 	};
 	
-	setInterval(pollGameday, hourly);
+	setInterval(pollPlayers, minutely);
 	
 	subscriber.on("message", function(channel, message) {
 
