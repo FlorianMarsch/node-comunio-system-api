@@ -76,7 +76,7 @@ module.exports = function(){
 							var goalcount = player.t+player.e;
 							for (i = 0; i < goalcount; i++) {
 								player.index = i;
-								events.push(player);
+								events.push(JSON.parse(JSON.stringify(player)));
 							}
 						});
 						
