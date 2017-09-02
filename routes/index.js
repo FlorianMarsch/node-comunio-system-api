@@ -63,6 +63,7 @@ module.exports = function(){
 						var partie = response.p;
 						var scores = [];
 						var events = goals.filter(function(goal){
+							goal.index = "own";
 							return goal.o > 0; // start with own goals initialized
 						});
 
@@ -74,6 +75,7 @@ module.exports = function(){
 						goalplayers.forEach(function(player,index){
 							var goalcount = player.t+player.e;
 							for (i = 0; i < goalcount; i++) {
+								player.index = i;
 								events.push(player);
 							}
 						});
@@ -86,7 +88,7 @@ module.exports = function(){
 						
 						events.forEach(function(goal, index){
 							var score = {};
-							score.id=partie + "-" + index+"-"+goal.n;
+							score.id=partie + "-" + goal.index+"-"+goal.n;
 							score.id=score.id.replace(" ", "").replace(".", "").toUpperCase();
 							score.name=goal.n;
 							score.event="Goal";
