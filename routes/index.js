@@ -6,6 +6,78 @@ var Series = require('./async');
 var request = require('request');
 
 module.exports = function(){
+
+	var matchparser = converter.createParser(['#right .mobileOnly .stretch tr', {
+		home: function ($a) {
+			if($a.find('.clubicon')[0]){
+				return  $a.find('.clubicon')[0].attribs.alt;
+			}
+			return null;
+		},
+		guest: function ($a) {
+			if($a.find('.clubicon')[1]){
+				return $a.find('.clubicon')[1].attribs.alt;
+			}
+			return null;
+		  },
+	  }]);
+		
+
+	var standingparser = converter.createParser(['.rangliste tr', {
+		team: function ($a) {
+		  return  $a.find('td:nth-child(2)').text();
+		},
+		position: function ($a) {
+		  return parseInt($a.find('td:nth-child(1)').text());
+		},
+		points: function ($a) {
+			return parseInt($a.find('td:nth-child(8)').text());
+		},
+		series: function ($a) {
+		  return $a.find('td:nth-child(5)').text().replace("/", "-").replace("/", "-");
+		}
+	  }]);
+	  
+	  router.get('/api/standing', function(req, res) {
+		var response = {};
+		gamedayparser.request('http://stats.comunio.de/matchday').done(function (days) {		
+			var matchday = days[0];
+			standingparser.request('http://stats.comunio.de/league_standings.php?gameday_start='+(matchday.gameday-4)+'&gameday_end='+(matchday.gameday-1)+'&place=ha&season='+matchday.season).done(function (standings) {		
+			
+				matchparser.request('http://stats.comunio.de/league_standings.php?gameday_start='+(matchday.gameday-4)+'&gameday_end='+(matchday.gameday-1)+'&place=ha&season='+matchday.season).done(function (matches) {		
+					response.matches=matches.filter(function(match){
+						if(match.home){
+							return match;
+						}
+					}).map(function(match){
+						var mapped = {};
+						mapped.home = standings.filter(function(stand){
+							if(stand.team === match.home){
+								return stand;
+							}
+						})[0];
+						mapped.guest = standings.filter(function(stand){
+							if(stand.team === match.guest){
+								return stand;
+							}
+						})[0];
+						mapped.guess='1:0';
+						if(mapped.guest.points > mapped.home.points){
+							mapped.guess='0:1';
+						}
+						return mapped;
+					});
+					res.send(response);
+				});
+
+
+			}); 
+		}); 
+
+
+		
+	});
+
 	
 	var gamedayparser = converter.createParser(['#inhalt h3', {
 		  gameday: function ($a) {
