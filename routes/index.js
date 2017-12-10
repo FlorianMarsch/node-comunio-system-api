@@ -20,6 +20,12 @@ module.exports = function(){
 			}
 			return null;
 		  },
+		  result: function ($a) {
+			if($a.find('a')[0]){
+				return $a.find('a').text();
+			}
+			return null;
+		  },
 	  }]);
 		
 
@@ -51,6 +57,9 @@ module.exports = function(){
 						}
 					}).map(function(match){
 						var mapped = {};
+						if(match.result){
+							mapped.result = match.result;
+						}
 						mapped.home = standings.filter(function(stand){
 							if(stand.team === match.home){
 								return stand;
