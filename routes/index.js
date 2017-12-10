@@ -27,6 +27,8 @@ module.exports = function(){
 			return null;
 		  },
 	  }]);
+
+	  
 		
 
 	var standingparser = converter.createParser(['.rangliste tr', {
@@ -49,9 +51,9 @@ module.exports = function(){
 		gamedayparser.request('http://stats.comunio.de/matchday').done(function (days) {		
 			var matchday = days[0];
 			standingparser.request('http://stats.comunio.de/league_standings.php?gameday_start='+(matchday.gameday-4)+'&gameday_end='+(matchday.gameday-1)+'&place=ha&season='+matchday.season).done(function (standings) {		
-			
+				
 				matchparser.request('http://stats.comunio.de/league_standings.php?gameday_start='+(matchday.gameday-4)+'&gameday_end='+(matchday.gameday-1)+'&place=ha&season='+matchday.season).done(function (matches) {		
-					response.matches=matches.filter(function(match){
+						response.matches=matches.filter(function(match){
 						if(match.home){
 							return match;
 						}
@@ -86,6 +88,68 @@ module.exports = function(){
 
 		
 	});
+
+	var custommatchparser = converter.createParser(['#inhalt .stretch98 tr', {
+		home: function ($a) {
+			if($a.find('.leftClub span') ){
+				return  $a.find('.leftClub span').text();
+			}
+			return null;
+		},
+		guest: function ($a) {
+			if($a.find('.rightClub span') ){
+				return $a.find('.rightClub span').text();
+			}
+			return null;
+		  },
+		  result: function ($a) {
+			if($a.find('.matchdayResult')){
+				return $a.find('.matchdayResult').text();
+			}
+			return null;
+		  }
+	  }]);
+	router.get('/api/standing/:season/:number', function(req, res) {
+		var matchday = {};	
+		var response = {};	
+		matchday.season = req.params.season;
+		matchday.gameday = req.params.number;
+
+		standingparser.request('http://stats.comunio.de/league_standings.php?gameday_start='+(matchday.gameday-4)+'&gameday_end='+(matchday.gameday-1)+'&place=ha&season='+matchday.season).done(function (standings) {		
+				custommatchparser.request('http://stats.comunio.de/matchday/'+matchday.season+'/'+matchday.gameday).done(function (matches) {		
+					
+					response.matches=matches.filter(function(match){
+						if(match.home){
+							return match;
+						}
+					}).map(function(match){
+						var mapped = {};
+						if(match.result){
+							mapped.result = match.result;
+						}
+						mapped.home = standings.filter(function(stand){
+							if(stand.team === match.home){
+								return stand;
+							}
+						})[0];
+						mapped.guest = standings.filter(function(stand){
+							if(stand.team === match.guest){
+								return stand;
+							}
+						})[0];
+						mapped.guess='1:0';
+						if(mapped.guest.points > mapped.home.points){
+							mapped.guess='0:1';
+						}
+						return mapped;
+					});
+					res.send(response);
+				});
+
+
+			}); 
+		}); 
+	
 
 	
 	var gamedayparser = converter.createParser(['#inhalt h3', {
