@@ -204,6 +204,7 @@ module.exports = function () {
 					request("http://stats.comunio.de/matchdetails.php?mid=" + game, function (error, response, body) {
 
 						var parsed = JSON.parse(unorm.nfkd(body).replace(combining, ''));
+						console.log(parsed);
 						var goals = parsed.g;
 						var partie = parsed.p;
 						var scores = [];
