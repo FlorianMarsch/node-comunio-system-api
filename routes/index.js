@@ -201,7 +201,8 @@ module.exports = function () {
 			var series = new Series();
 			games.forEach(function (game) {
 				series.then(function (done) {
-					request("http://stats.comunio.de/xhr/matchdetails.php?mid=" + game, function (error, response, body) {
+					request("http://stats.comunio.de/matchdetails.php?mid=" + game, function (error, response, body) {
+
 						var parsed = JSON.parse(unorm.nfkd(body).replace(combining, ''));
 						var goals = parsed.g;
 						var partie = parsed.p;
@@ -231,6 +232,7 @@ module.exports = function () {
 
 
 						events.forEach(function (goal, index) {
+							goal.n = unorm.nfkd(goal.n).replace(combining, '')
 							var score = {};
 							score.id = partie + "-" + goal.index + "-" + goal.n;
 							score.id = score.id.replace(" ", "").replace(".", "").toUpperCase();
