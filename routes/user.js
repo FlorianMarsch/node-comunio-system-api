@@ -4,6 +4,14 @@ var htmlToJson = require('html-to-json');
 var unorm = require('unorm');
 var request = require('request');
 
+
+var playerparser = htmlToJson.createParser(['.tablecontent03 img', {
+	id: function ($a) {
+		console.log($a.attr('src'));
+		return $a.attr('src');
+	}
+}]);
+
 module.exports = function () {
 
 
@@ -47,23 +55,40 @@ module.exports = function () {
 						url: 'https://classic.comunio.de/playerInfo.phtml?pid=' + profile.id,
 						jar: j
 					}, function (err, httpResponse, body) {
+						playerparser.parse(body, function (_, players) {
 
-						htmlToJson.parse(body, {
-							'nickname': function ($doc) {
-								return $doc.find('h1').text().split("(")[0].trim();
-							}
-						}, function (err, result) {
-							profile.nickname = result.nickname;
-							res.status(200).send({
-								jar: j.getCookies('https://classic.comunio.de'),
-								profile: profile
+							htmlToJson.parse(body, {
+								'nickname': function ($doc) {
+									return $doc.find('h1').text().split("(")[0].trim();
+								},
+								'players': function ($doc) {
+
+									return players.filter(function (player) {
+										return !player.id.includes("clubImg");
+									}).map(function (player) {
+										return player.id.split("/")[3].split(".gif").join("");
+									});
+
+								}
+							}, function (err, result) {
+								profile.nickname = result.nickname;
+								profile.players = result.players;
+								res.cookie("session_jar", j.getCookies('https://classic.comunio.de'))
+								res.status(200).send({
+									profile: profile
+								});
 							});
-						});
+						})
+
 					});
 				});
 			})
 		})
 	});
+
+
+
+
 
 	return router;
 }
