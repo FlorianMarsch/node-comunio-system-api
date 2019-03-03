@@ -284,7 +284,7 @@ module.exports = function () {
 
 	var playerparser = converter.createParser(['.rangliste tbody tr', {
 		id: function ($a) {
-			return $a.find(' .playerCompare div div').attr('data-basepid');
+			return $a.find(' .playerCompare').attr('data-playerid');
 		},
 		name: function ($a) {
 			var name = $a.find(' .playerCompare div a').text();
@@ -303,7 +303,7 @@ module.exports = function () {
 			return parseInt($a.find('td:nth-child(5)').text().replace(".", "").replace(".", ""));
 		},
 		picture: function ($a) {
-			var id = $a.find(' .playerCompare div div').attr('data-basepid');
+			var id = $a.find(' .playerCompare').attr('data-playerid');
 			return 'http://classic.comunio.de/tradablePhoto.phtml/l/' + id + '.gif';
 		}
 	}]);
