@@ -284,7 +284,7 @@ module.exports = function () {
 
 	var playerparser = converter.createParser(['.rangliste tbody tr', {
 		id: function ($a) {
-			return $a.find(' .playerCompare').attr('data-playerid');
+			return Number($a.find(' .playerCompare').attr('data-playerid'));
 		},
 		name: function ($a) {
 			var name = $a.find(' .playerCompare div a').text();
