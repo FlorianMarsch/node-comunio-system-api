@@ -201,48 +201,25 @@ module.exports = function () {
 			var series = new Series();
 			games.forEach(function (game) {
 				series.then(function (done) {
-					request("http://stats.comunio.de/xhr/matchdetails.php?mid=" + game, function (error, response, body) {
+					request("http://stats.comunio.de/xhr/matchDetails.php?mid=" + game, function (error, response, body) {
 
 						var parsed = JSON.parse(unorm.nfkd(body).replace(combining, ''));
-						var goals = parsed.g;
-						var partie = parsed.p;
-						var scores = [];
-						var events = goals.filter(function (goal) {
-							goal.index = "own";
-							return goal.o > 0; // start with own goals initialized
-						});
 
-						var players = parsed.h.concat(parsed.a);
-						var goalplayers = players.filter(function (player) {
-							return player.t > 0 || player.e > 0;
-						});
-
-						goalplayers.forEach(function (player, index) {
-							var goalcount = player.t + player.e;
-							for (i = 0; i < goalcount; i++) {
-								player.index = i;
-								events.push(JSON.parse(JSON.stringify(player)));
-							}
-						});
+						var partie = parsed.matchId;
 
 
-
-
-
-
-
-						events.forEach(function (goal, index) {
-							goal.n = unorm.nfkd(goal.n).replace(combining, '')
+						var scores = parsed.goals.map(function (goal, index) {
+							goal.name = unorm.nfkd(goal.name).replace(combining, '')
 							var score = {};
-							score.id = partie + "-" + goal.index + "-" + goal.n;
+							score.id = partie + "-" + goal.minute + "-" + goal.name;
 							score.id = score.id.replace(" ", "").replace(".", "").toUpperCase();
-							score.name = goal.n;
+							score.name = goal.name;
 							score.event = "Goal";
 
-							if (goal.o) {
+							if (goal.og > 0) {
 								score.event = "Own";
 							}
-							scores.push(score);
+							return score
 						});
 
 						done(scores);
