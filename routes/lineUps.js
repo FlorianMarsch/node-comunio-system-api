@@ -27,7 +27,8 @@ module.exports = {
 			function (error, response, body) {
 				callback(JSON.parse(body).tradables.map((player) => {
 					return {
-						name: unorm.nfkd(player.name).replace(combining, '').trim()
+						name: unorm.nfkd(player.name).replace(combining, '').trim(),
+						points: player.lastPointsUser
 					}
 				}))
 			})
