@@ -20,5 +20,22 @@ module.exports = {
 		gamedayparser.request('http://stats.comunio.de/matchday').done(function (days) {
 			callback(days[0]);
 		});
+	},
+	saveGameday: function (api, gameday, callback) {
+
+
+		request({
+			method: 'POST',
+			uri: api + '/api/gameday',
+			body: JSON.stringify(gameday),
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		},
+			function (error, response, body) {
+				callback(gameday)
+			})
+
+
 	}
 }

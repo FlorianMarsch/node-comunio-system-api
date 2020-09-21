@@ -10,9 +10,6 @@ module.exports = {
 			uri: api + '/api/community',
 		},
 			function (error, response, body) {
-
-				console.log(response)
-
 				callback(JSON.parse(body));
 			})
 	}

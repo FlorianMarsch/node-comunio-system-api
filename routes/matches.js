@@ -57,6 +57,7 @@ module.exports = {
 			}
 		},
 			function (error, response, body) {
+				console.log(response.statusCode)
 				callback(goals)
 			})
 	}
