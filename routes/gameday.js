@@ -9,7 +9,7 @@ var request = require('request');
 module.exports = {
 	resolveGameday: function (callback) {
 
-		var gamedayparser = htmlToJson.createParser(['#inhalt h3', {
+		var gamedayparser = htmlToJson.createParser(['#content h3', {
 			number: function ($a) {
 				return parseInt($a.text().split(". Spieltag ")[0]);
 			},
